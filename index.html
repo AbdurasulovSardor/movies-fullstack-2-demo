@@ -67,10 +67,15 @@
 
         <section class="col-md-8">
           <h2 class="h5">Search results</h2>
+
           <div class="alert alert-info">Use the form on the left to search for a movie</div>
 
           <ul class="search-results row list-unstyled">
           </ul>
+
+          <nav aria-label="Page navigation example">
+            <ul class="pagination flex-wrap justify-content-center"></ul>
+          </nav>
         </section>
       </div><!-- row -->
     </div><!-- container -->
@@ -137,6 +142,14 @@
     <li class="bookmarked-movie list-group-item">
       <h3 class="bookmarked-movie__title h6"></h3>
       <button class="btn btn-sm btn-danger js-remove-bookmarked-movie-button">Remove</button>
+    </li>
+  </template>
+
+
+  <!-- Pagination item template -->
+  <template id="pagination-item-template">
+    <li class="page-item">
+      <a class="page-link" data-start-index="" href="#"></a>
     </li>
   </template>
 

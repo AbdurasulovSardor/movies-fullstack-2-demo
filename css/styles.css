@@ -1,3 +1,7 @@
+html {
+  scroll-behavior: smooth;
+}
+
 .movie__poster {
   object-fit: cover;
 }

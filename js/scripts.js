@@ -1,3 +1,8 @@
+var searchResults;
+var searchRegex;
+var pageSize = 10;
+var currentPage = 1;
+var pagesCount;
 var bookmarkedMovies = JSON.parse(localStorage.getItem('local-bookmarks')) || [];
 
 
@@ -8,12 +13,14 @@ var elSearchGenreSelect = $_('.js-search-form__genre-select', elSearchForm);
 var elSearchSortSelect = $_('.js-search-form__sort-select', elSearchForm);
 
 var elSearchResults = $_('.search-results');
+var elPagination = $_('.pagination');
 var elBookmarkedMovies = $_('.bookmarked-movies');
 
 var elMovieInfoModal = $_('.movie-info-modal');
 var elMovieInfoModalTitle = $_('.movie-info-modal__title', elMovieInfoModal);
 
 var elSearchResultTemplate = $_('#search-result-template').content;
+var elPaginationItemTemplate = $_('#pagination-item-template').content;
 var elBookmarkedMovieTemplate = $_('#bookmarked-movie-template').content;
 
 
@@ -166,23 +173,41 @@ var findMovies = function (title, minRating, genre) {
   });
 };
 
+var paginate = function (movies) {
+  pagesCount = Math.ceil(movies.length / pageSize);
+
+  elPagination.innerHTML = '';
+  var elPaginationItemsFragment = document.createDocumentFragment();
+
+  for (var i = 0; i < pagesCount; i++) {
+    var elNewPaginationItem = elPaginationItemTemplate.cloneNode(true);
+    $_('.page-link', elNewPaginationItem).dataset.startIndex = i * pageSize;
+    $_('.page-link', elNewPaginationItem).textContent = i + 1;
+
+    elPaginationItemsFragment.appendChild(elNewPaginationItem);
+  }
+
+  elPagination.appendChild(elPaginationItemsFragment);
+};
+
 
 // Arrow function
 elSearchForm.addEventListener('submit', (evt) => {
   evt.preventDefault();
 
   var searchTitle = elSearchTitleInput.value.trim();
-  var movieTitleRegex = new RegExp(searchTitle, 'gi');
+  searchRegex = new RegExp(searchTitle, 'gi');
   var minimumRating = Number(elSearchRatingInput.value);
   var genre = elSearchGenreSelect.value;
   var sorting = elSearchSortSelect.value;
 
   /* var searchResults = sortSearchResults(findMovies(movieTitleRegex, minimumRating, genre), sorting); */
 
-  var searchResults = findMovies(movieTitleRegex, minimumRating, genre);
+  searchResults = findMovies(searchRegex, minimumRating, genre);
   searchResults = sortSearchResults(searchResults, sorting);
 
-  renderResults(searchResults, movieTitleRegex);
+  renderResults(searchResults.slice(0, pageSize), searchRegex);
+  paginate(searchResults);
 });
 
 var updateMovieModalContent = function (movie) {
@@ -281,5 +306,20 @@ elBookmarkedMovies.addEventListener('click', (evt) => {
 
     updateLocalBookmarks();
     renderBookmarkedMovies();
+  }
+});
+
+elPagination.addEventListener('click', function (evt) {
+  if (evt.target.matches('.page-link')) {
+    evt.preventDefault();
+
+    evt.target.closest('.pagination').querySelectorAll('.page-item').forEach(function (li) {
+      li.classList.remove('active');
+    });
+
+    evt.target.parentNode.classList.add('active');
+    var startIndex = Number(evt.target.dataset.startIndex);
+    renderResults(searchResults.slice(startIndex, startIndex + pageSize), searchRegex);
+    window.scrollTo(0, 0);
   }
 });
